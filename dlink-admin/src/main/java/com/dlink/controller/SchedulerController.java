@@ -84,6 +84,18 @@ public class SchedulerController {
     @Autowired
     private CatalogueService catalogueService;
 
+    @GetMapping
+    @ApiOperation(value = "查看海豚调度是否可用", notes = "查看海豚调度是否可用")
+    public Result<Boolean> isExist() {
+        try {
+            SystemInit.getProject();
+        } catch (SchedulerException e) {
+            logger.info(e.getMessage(), e);
+            return Result.succeed(false);
+        }
+        return Result.succeed(true);
+    }
+
     /**
      * 获取任务定义
      */

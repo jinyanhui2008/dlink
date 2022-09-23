@@ -31,8 +31,17 @@ import StudioConsole from "./StudioConsole";
 import StudioLeftTool from "./StudioLeftTool";
 import StudioRightTool from "./StudioRightTool";
 import {
-  listSession, showCluster, showDataBase, getFillAllByVersion,
-  showClusterConfiguration, showSessionCluster, showJars, showEnv, showAlertInstance, showAlertGroup
+  listSession,
+  showCluster,
+  showDataBase,
+  getFillAllByVersion,
+  showClusterConfiguration,
+  showSessionCluster,
+  showJars,
+  showEnv,
+  showAlertInstance,
+  showAlertGroup,
+  getDolphinSchduleAvailable,
 } from "@/components/Studio/StudioEvent/DDL";
 import {loadSettings} from "@/pages/Settings/function";
 import DraggleLayout from "@/components/DraggleLayout";
@@ -71,6 +80,7 @@ const Studio = (props: any) => {
   }, [onResize]);
 
   useEffect(() => {
+    getDolphinSchduleAvailable(dispatch)
     loadSettings(dispatch);
     getFillAllByVersion('', dispatch);
     showCluster(dispatch);

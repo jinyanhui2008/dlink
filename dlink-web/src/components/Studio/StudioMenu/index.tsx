@@ -30,10 +30,10 @@ import Space from "antd/es/space";
 import Divider from "antd/es/divider";
 import Button from "antd/es/button/button";
 import Breadcrumb from "antd/es/breadcrumb/Breadcrumb";
-import {StateType} from "@/pages/DataStudio/model";
+import {StateType, UseDolphinType} from "@/pages/DataStudio/model";
 import {connect} from "umi";
 import {CODE, postDataArray} from "@/components/Common/crud";
-import {executeSql, getJobPlan, getTaskDefinition} from "@/pages/DataStudio/service";
+import {executeSql, getJobPlan, getTaskDefinition, isUsingDS} from "@/pages/DataStudio/service";
 import TaskAPI from "@/pages/API/TaskAPI";
 import StudioHelp from "./StudioHelp";
 import StudioGraph from "./StudioGraph";
@@ -63,6 +63,8 @@ import {Dispatch} from "@@/plugin-dva/connect";
 import StudioTabs from "@/components/Studio/StudioTabs";
 import {isDeletedTask, JOB_LIFE_CYCLE} from "@/components/Common/JobLifeCycle";
 import DolphinPush from "@/components/Studio/StudioMenu/DolphinPush";
+import {JobInfoDetail} from "@/pages/DevOps/data";
+import studio from "@/components/Studio";
 
 const menu = (
   <Menu>
@@ -73,7 +75,19 @@ const menu = (
 
 const StudioMenu = (props: any) => {
 
-  const {isFullScreen, tabs, current, currentPath, form, width, height, refs, dispatch, currentSession} = props;
+  const {
+    isFullScreen,
+    tabs,
+    current,
+    showSubmitDelphin,
+    currentPath,
+    form,
+    width,
+    height,
+    refs,
+    dispatch,
+    currentSession
+  } = props;
   const [modalVisible, handleModalVisible] = useState<boolean>(false);
   const [exportModalVisible, handleExportModalVisible] = useState<boolean>(false);
   const [graphModalVisible, handleGraphModalVisible] = useState<boolean>(false);
@@ -81,6 +95,10 @@ const StudioMenu = (props: any) => {
   // const [editModalVisible, handleEditModalVisible] = useState<boolean>(false);
   const [graphData, setGraphData] = useState();
   const [dolphinData, setDolphinData] = useState();
+
+  //whether dolphin push button is view
+  const [isShowSubmitDelphin, setIsShowSubmitDelphin] = useState<boolean>(false);
+  const [job] = useState<JobInfoDetail>();
 
   const onKeyDown = useCallback((e) => {
     if (e.keyCode === 83 && (e.ctrlKey === true || e.metaKey)) {
@@ -99,6 +117,8 @@ const StudioMenu = (props: any) => {
   }, [current]);
 
   useEffect(() => {
+    //Whether to use dolphinscheduler && dispatching
+    // useDolphinscheduler()
     document.addEventListener("keydown", onKeyDown)
     return () => {
       document.removeEventListener("keydown", onKeyDown)
@@ -231,7 +251,22 @@ const StudioMenu = (props: any) => {
     })
   };
 
-  //获取当前task关联的海豚数据
+  //whether dolphinscheduler dispatching is allowed
+  const useDolphinscheduler = () => {
+    // debugger
+
+    const res = isUsingDS();
+    res.then((result) => {
+      // debugger
+      if (result.code == CODE.SUCCESS) {
+        setIsShowSubmitDelphin(result.datas)
+      } else {
+        message.error(`获取海豚数据失败，原因：\n${result.msg}`);
+      }
+    })
+  };
+
+  //Get the dolphin data associated with the current task
   const viewDolphinCon = () => {
     const res = getTaskDefinition(current.task.id);
     res.then((result) => {
@@ -635,7 +670,7 @@ const StudioMenu = (props: any) => {
                   />
                 </Tooltip>
               </>)}
-              {isShowSubmitBtn() && (<>
+              {isShowSubmitBtn() && showSubmitDelphin&& current.task && current.task.batchModel && (<>
                 <Tooltip title="推送到海豚调度">
                   <Button
                     type="text" style={{color: '#248FFF'}}
@@ -825,11 +860,16 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   }),
 });
 
-export default connect(({Studio}: { Studio: StateType }) => ({
+export default connect(state  => {
+  // console.log(state)
+  let { Studio} = state
+  return {
   isFullScreen: Studio.isFullScreen,
   current: Studio.current,
   currentPath: Studio.currentPath,
   tabs: Studio.tabs,
   refs: Studio.refs,
   currentSession: Studio.currentSession,
-}), mapDispatchToProps)(StudioMenu);
+    showSubmitDelphin: Studio.canUsed
+}
+}, mapDispatchToProps)(StudioMenu);

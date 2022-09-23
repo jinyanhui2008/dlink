@@ -111,7 +111,14 @@ export async function getMSSchemaInfo(params: StudioMetaStoreParam) {
   });
 }
 
-//海豚 获取任务定义
+//dolphinscheduler -- 是否允许调度海豚 -- whether dolphinscheduler dispatching is allowed
+export async function isUsingDS() {
+  return request<API.Result>('/api/scheduler', {
+    method: 'GET'
+  });
+}
+
+//dolphinscheduler -- 获取任务定义 -- get task definition
 export async function getTaskDefinition(dinkyTaskId: string) {
   return request<API.Result>('/api/scheduler/task', {
     method: 'GET',
@@ -121,7 +128,7 @@ export async function getTaskDefinition(dinkyTaskId: string) {
   });
 }
 
-//海豚 获取任务定义集合
+//dolphinscheduler -- 获取任务定义集合 -- get task definition collection
 export async function getTaskMainInfos(dinkyTaskId: string) {
   return request<API.Result>('/api/scheduler/upstream/tasks', {
     method: 'GET',
@@ -131,7 +138,7 @@ export async function getTaskMainInfos(dinkyTaskId: string) {
   });
 }
 
-//海豚 创建任务定义
+//dolphinscheduler -- 创建任务定义 -- create task definition
 export async function createTaskDefinition(dinkyTaskId: string, upstreamCodes: string, params: object) {
   return request<API.Result>('/api/scheduler/task', {
     method: 'POST',
@@ -145,7 +152,7 @@ export async function createTaskDefinition(dinkyTaskId: string, upstreamCodes: s
   });
 }
 
-//海豚 更新任务定义
+//dolphinscheduler -- 更新任务定义 -- update task definition
 export async function updateTaskDefinition(processCode: string, projectCode: string, taskCode: string, upstreamCodes: string, params: object) {
   return request<API.Result>('/api/scheduler/task', {
     method: 'PUT',

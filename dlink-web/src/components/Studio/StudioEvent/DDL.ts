@@ -18,11 +18,11 @@
  */
 
 
-import {executeDDL, getMSCatalogs} from "@/pages/DataStudio/service";
+import {executeDDL, getMSCatalogs, isUsingDS} from "@/pages/DataStudio/service";
 import FlinkSQL from "./FlinkSQL";
 import {MetaStoreCatalogType, SessionType, TaskType} from "@/pages/DataStudio/model";
 import {message, Modal} from "antd";
-import {addOrUpdateData, getData, handleRemove} from "@/components/Common/crud";
+import {addOrUpdateData, CODE, getData, handleRemove} from "@/components/Common/crud";
 
 /*--- 保存sql ---*/
 export function saveTask(current: any, dispatch: any) {
@@ -161,6 +161,21 @@ export function showSessionCluster(dispatch: any) {
       payload: result.datas,
     });
   });
+}
+/*--- 刷新 Session集群 ---*/
+export function getDolphinSchduleAvailable(dispatch: any) {
+  const res = isUsingDS();
+  res.then((result) => {
+    // debugger
+    if (result.code == CODE.SUCCESS) {
+      dispatch({
+        type: "Studio/saveDolphinType",
+        payload: result.datas,
+      })
+    } else {
+      message.error(`获取海豚数据失败，原因：\n${result.msg}`);
+    }
+  })
 }
 
 /*--- 刷新 数据源 ---*/

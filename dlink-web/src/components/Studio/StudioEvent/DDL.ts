@@ -18,11 +18,11 @@
  */
 
 
-import {executeDDL, getMSCatalogs} from "@/pages/DataStudio/service";
+import {executeDDL, getMSCatalogs, isUsingDS} from "@/pages/DataStudio/service";
 import FlinkSQL from "./FlinkSQL";
 import {MetaStoreCatalogType, SessionType, TaskType} from "@/pages/DataStudio/model";
 import {message, Modal} from "antd";
-import {addOrUpdateData, getData, handleRemove, postAll} from "@/components/Common/crud";
+import {addOrUpdateData, CODE, getData, handleRemove, postAll} from "@/components/Common/crud";
 
 /*--- 保存sql ---*/
 export function saveTask(current: any, dispatch: any) {
@@ -163,6 +163,22 @@ export function showSessionCluster(dispatch: any) {
   });
 }
 
+/*--- 刷新 Session集群 ---*/
+export function getDolphinSchduleAvailable(dispatch: any) {
+  const res = isUsingDS();
+  res.then((result) => {
+    // debugger
+    if (result.code == CODE.SUCCESS) {
+      dispatch({
+        type: "Studio/saveDolphinType",
+        payload: result.datas,
+      })
+    } else {
+      message.error(`获取海豚数据失败，原因：\n${result.msg}`);
+    }
+  })
+}
+
 /*--- 刷新 数据源 ---*/
 export function showDataBase(dispatch: any) {
   const res = getData('api/database/listEnabledAll');
@@ -222,9 +238,10 @@ export function showAlertGroup(dispatch: any) {
 export function showMetaDataTable(id: number) {
   return getData('api/database/getSchemasAndTables', {id: id});
 }
+
 /*--- 刷新 数据表样例数据 ---*/
-export function showTableData(id: number,schemaName:String,tableName:String,option:{}) {
-  return postAll('api/database/queryData', {id: id,schemaName:schemaName,tableName:tableName,option:option});
+export function showTableData(id: number, schemaName: String, tableName: String, option: {}) {
+  return postAll('api/database/queryData', {id: id, schemaName: schemaName, tableName: tableName, option: option});
 }
 
 /*--- 刷新 Flink Jobs ---*/

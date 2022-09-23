@@ -180,6 +180,7 @@ export type MetaStoreColumnType = {
 }
 
 export type StateType = {
+  canUsed:boolean,
   isFullScreen: boolean;
   toolHeight?: number;
   toolRightWidth?: number;
@@ -238,12 +239,15 @@ export type ModelType = {
     changeTaskStep: Reducer<StateType>;
     changeTaskJobInstance: Reducer<StateType>;
     renameTab: Reducer<StateType>;
+    saveDolphinType: Reducer<StateType>
   };
 };
 
 const Model: ModelType = {
   namespace: 'Studio',
   state: {
+
+    canUsed: false,
     isFullScreen: false,
     toolHeight: 400,
     toolRightWidth: 300,
@@ -505,6 +509,12 @@ const Model: ModelType = {
       return {
         ...state,
         session: [...payload],
+      };
+    },
+    saveDolphinType(state, {payload}) {
+      return {
+        ...state,
+        canUsed: payload,
       };
     },
     showRightClickMenu(state, {payload}) {

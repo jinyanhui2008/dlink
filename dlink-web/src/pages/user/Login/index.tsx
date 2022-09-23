@@ -26,19 +26,22 @@ import {
   UserOutlined,
   WeiboCircleOutlined,
 } from '@ant-design/icons';
-import { Alert, Space, message, Tabs } from 'antd';
-import React, { useState } from 'react';
-import ProForm, { ProFormCaptcha, ProFormCheckbox, ProFormText } from '@ant-design/pro-form';
-import { useIntl, Link, history, FormattedMessage, SelectLang, useModel } from 'umi';
+import {Alert, Space, message, Tabs} from 'antd';
+import React, {useState} from 'react';
+import ProForm, {ProFormCaptcha, ProFormCheckbox, ProFormText} from '@ant-design/pro-form';
+import {useIntl, Link, history, FormattedMessage, SelectLang, useModel, connect} from 'umi';
 import Footer from '@/components/Footer';
-import { login } from '@/services/ant-design-pro/api';
-import { getFakeCaptcha } from '@/services/ant-design-pro/login';
+import {login} from '@/services/ant-design-pro/api';
+import {getFakeCaptcha} from '@/services/ant-design-pro/login';
 
 import styles from './index.less';
+import {isUsingDS} from "@/pages/DataStudio/service";
+import {CODE} from "@/components/Common/crud";
+import {AlertStateType, Dispatch, JarStateType, StateType} from "@@/plugin-dva/connect";
 
 const LoginMessage: React.FC<{
   content: string;
-}> = ({ content }) => (
+}> = ({content}) => (
   <Alert
     style={{
       marginBottom: 24,
@@ -53,18 +56,19 @@ const LoginMessage: React.FC<{
 const goto = () => {
   if (!history) return;
   setTimeout(() => {
-    const { query } = history.location;
-    const { redirect } = query as { redirect: string };
+    const {query} = history.location;
+    const {redirect} = query as { redirect: string };
     history.push(redirect || '/');
   }, 10);
 };
 
-const Login: React.FC = () => {
+const Login: React.FC = (props: any) => {
   const [submitting, setSubmitting] = useState(false);
   const [userLoginState, setUserLoginState] = useState<API.LoginResult>({});
   const [type, setType] = useState<string>('password');
-  const { initialState, setInitialState } = useModel('@@initialState');
+  const {initialState, setInitialState} = useModel('@@initialState');
   const [isLogin, setIsLogin] = useState<boolean>(true);
+
 
   const intl = useIntl();
 
@@ -78,24 +82,42 @@ const Login: React.FC = () => {
     }
   };
 
+  //Whether to use dolphinscheduler && dispatching
+  const useDolphinScheduler = async () => {
+    const res = isUsingDS();
+    res.then((result) => {
+      // debugger
+      if (result.code == CODE.SUCCESS) {
+        props.useDolphinScheduler(result.datas)
+      } else {
+        message.error(`获取海豚数据失败，原因：\n${result.msg}`);
+      }
+    })
+  };
+
   const handleSubmit = async (values: API.LoginParams) => {
-    if(!isLogin) {return;}
+    if (!isLogin) {
+      return;
+    }
     setIsLogin(false);
-    setTimeout(()=>{setIsLogin(true)},200);
+    setTimeout(() => {
+      setIsLogin(true)
+    }, 200);
     setSubmitting(true);
     try {
       // 登录
-      const msg = await login({ ...values, type });
-      if (msg.code === 0 && msg.datas!=undefined ) {
+      const msg = await login({...values, type});
+      if (msg.code === 0 && msg.datas != undefined) {
         const defaultloginSuccessMessage = intl.formatMessage({
           id: 'pages.login.success',
           defaultMessage: '登录成功！',
         });
         message.success(defaultloginSuccessMessage);
         await fetchUserInfo();
+        await useDolphinScheduler();
         goto();
         return;
-      }else{
+      } else {
         const defaultloginFailureMessage = intl.formatMessage({
           id: msg.msg,
           defaultMessage: msg.msg,
@@ -118,17 +140,17 @@ const Login: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.lang}>{SelectLang && <SelectLang />}</div>
+      <div className={styles.lang}>{SelectLang && <SelectLang/>}</div>
       <div className={styles.content}>
         <div className={styles.top}>
           <div className={styles.header}>
             <Link to="/">
-              <img alt="logo" className={styles.logo} src="/dinky.svg" />
+              <img alt="logo" className={styles.logo} src="/dinky.svg"/>
               <span className={styles.title}>Dinky</span>
             </Link>
           </div>
           <div className={styles.desc}>
-            {intl.formatMessage({ id: 'pages.layouts.userLayout.title' })}
+            {intl.formatMessage({id: 'pages.layouts.userLayout.title'})}
           </div>
         </div>
 
@@ -151,7 +173,7 @@ const Login: React.FC = () => {
                 style: {
                   width: '100%',
                 },
-                htmlType:'submit',
+                htmlType: 'submit',
               },
             }}
             onFinish={async (values) => {
@@ -165,7 +187,7 @@ const Login: React.FC = () => {
                   name="username"
                   fieldProps={{
                     size: 'large',
-                    prefix: <UserOutlined className={styles.prefixIcon} />,
+                    prefix: <UserOutlined className={styles.prefixIcon}/>,
                   }}
                   placeholder={intl.formatMessage({
                     id: 'pages.login.username.placeholder',
@@ -187,7 +209,7 @@ const Login: React.FC = () => {
                   name="password"
                   fieldProps={{
                     size: 'large',
-                    prefix: <LockOutlined className={styles.prefixIcon} />,
+                    prefix: <LockOutlined className={styles.prefixIcon}/>,
                   }}
                   placeholder={intl.formatMessage({
                     id: 'pages.login.password.placeholder',
@@ -215,22 +237,30 @@ const Login: React.FC = () => {
               }}
             >
               <ProFormCheckbox noStyle name="autoLogin">
-                <FormattedMessage id="pages.login.rememberMe" defaultMessage="自动登录" />
+                <FormattedMessage id="pages.login.rememberMe" defaultMessage="自动登录"/>
               </ProFormCheckbox>
               <a
                 style={{
                   float: 'right',
                 }}
               >
-                <FormattedMessage id="pages.login.forgotPassword" defaultMessage="忘记密码" />
+                <FormattedMessage id="pages.login.forgotPassword" defaultMessage="忘记密码"/>
               </a>
             </div>
           </ProForm>
         </div>
       </div>
-      <Footer />
+      <Footer/>
     </div>
   );
 };
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  useDolphinScheduler: (data: any) => dispatch({
+    type: "Studio/saveDolphinType",
+    payload: data,
+  })
+})
 
-export default Login;
+
+export default connect(() => {
+}, mapDispatchToProps)(Login);

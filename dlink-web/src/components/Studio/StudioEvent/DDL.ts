@@ -18,7 +18,7 @@
  */
 
 
-import {executeDDL, getMSCatalogs, isUsingDS} from "@/pages/DataStudio/service";
+import {executeDDL, getMSCatalogs, isUsingDS, postDolphinCatalogueRelease} from "@/pages/DataStudio/service";
 import FlinkSQL from "./FlinkSQL";
 import {MetaStoreCatalogType, SessionType, TaskType} from "@/pages/DataStudio/model";
 import {message, Modal} from "antd";
@@ -163,7 +163,7 @@ export function showSessionCluster(dispatch: any) {
   });
 }
 
-/*--- 刷新 Session集群 ---*/
+/*--- 刷新 是否启动海豚服务 ---*/
 export function getDolphinSchduleAvailable(dispatch: any) {
   const res = isUsingDS();
   res.then((result) => {

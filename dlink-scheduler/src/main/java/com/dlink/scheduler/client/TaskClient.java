@@ -19,6 +19,7 @@
 
 package com.dlink.scheduler.client;
 
+import com.dlink.scheduler.config.DolphinSchedulerProperties;
 import com.dlink.scheduler.constant.Constants;
 import com.dlink.scheduler.enums.TaskType;
 import com.dlink.scheduler.exception.SchedulerException;
@@ -39,7 +40,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import cn.hutool.core.lang.TypeReference;
@@ -57,10 +58,8 @@ public class TaskClient {
 
     private static final Logger logger = LoggerFactory.getLogger(TaskClient.class);
 
-    @Value("${dinky.dolphinscheduler.url}")
-    private String url;
-    @Value("${dinky.dolphinscheduler.token}")
-    private String tokenKey;
+    @Autowired
+    private DolphinSchedulerProperties dolphinSchedulerProperties;
 
     /**
      * 查询任务定义
@@ -95,7 +94,7 @@ public class TaskClient {
     public List<TaskMainInfo> getTaskMainInfos(Long projectCode, String processName, String taskName, TaskType taskType) {
         Map<String, Object> map = new HashMap<>();
         map.put("projectCode", projectCode);
-        String format = StrUtil.format(url + "/projects/{projectCode}/task-definition", map);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/task-definition", map);
 
         Map<String, Object> pageParams = ParamUtil.getPageParams();
         pageParams.put("searchTaskName", taskName);
@@ -103,7 +102,7 @@ public class TaskClient {
         pageParams.put("taskType", taskType.name());
 
         String content = HttpRequest.get(format)
-            .header(Constants.TOKEN, tokenKey)
+            .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
             .form(pageParams)
             .timeout(5000)
             .execute().body();
@@ -139,10 +138,10 @@ public class TaskClient {
         Map<String, Object> map = new HashMap<>();
         map.put("projectCode", projectCode);
         map.put("code", taskCode);
-        String format = StrUtil.format(url + "/projects/{projectCode}/task-definition/{code}", map);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/task-definition/{code}", map);
 
         String content = HttpRequest.get(format)
-            .header(Constants.TOKEN, tokenKey)
+            .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
             .timeout(5000)
             .execute().body();
 
@@ -162,7 +161,7 @@ public class TaskClient {
     public TaskDefinitionLog createTaskDefinition(Long projectCode, Long processCode, String upstreamCodes, String taskDefinitionJsonObj) {
         Map<String, Object> map = new HashMap<>();
         map.put("projectCode", projectCode);
-        String format = StrUtil.format(url + "/projects/{projectCode}/task-definition/save-single", map);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/task-definition/save-single", map);
 
         Map<String, Object> pageParams = new HashMap<>();
         pageParams.put("processDefinitionCode", processCode);
@@ -173,7 +172,7 @@ public class TaskClient {
         pageParams.put("taskDefinitionJsonObj", taskDefinitionJsonObj);
 
         String content = HttpRequest.post(format)
-            .header(Constants.TOKEN, tokenKey)
+            .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
             .form(pageParams)
             .timeout(5000)
             .execute().body();
@@ -196,14 +195,14 @@ public class TaskClient {
         Map<String, Object> map = new HashMap<>();
         map.put("projectCode", projectCode);
         map.put("code", taskCode);
-        String format = StrUtil.format(url + "/projects/{projectCode}/task-definition/{code}/with-upstream", map);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/task-definition/{code}/with-upstream", map);
 
         Map<String, Object> params = new HashMap<>();
         params.put("upstreamCodes", upstreamCodes);
         params.put("taskDefinitionJsonObj", taskDefinitionJsonObj);
 
         String content = HttpRequest.put(format)
-            .header(Constants.TOKEN, tokenKey)
+            .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
             .form(params)
             .timeout(5000)
             .execute().body();
@@ -223,11 +222,11 @@ public class TaskClient {
     public List<Long> genTaskCodes(Long projectCode, int genNum) {
         Map<String, Object> map = new HashMap<>();
         map.put("projectCode", projectCode);
-        String format = StrUtil.format(url + "/projects/{projectCode}/task-definition/gen-task-codes", map);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/task-definition/gen-task-codes", map);
         Map<String, Object> params = new HashMap<>();
         params.put("genNum", genNum);
         String content = HttpRequest.get(format)
-            .header(Constants.TOKEN, tokenKey)
+            .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
             .form(params)
             .timeout(5000)
             .execute().body();

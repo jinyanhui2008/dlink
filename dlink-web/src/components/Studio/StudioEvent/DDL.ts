@@ -18,7 +18,7 @@
  */
 
 
-import {executeDDL, getMSCatalogs, isUsingDS} from "@/pages/DataStudio/service";
+import {executeDDL, getMSCatalogs, isUsingDS, postDolphinCatalogueRelease} from "@/pages/DataStudio/service";
 import FlinkSQL from "./FlinkSQL";
 import {MetaStoreCatalogType, SessionType, TaskType} from "@/pages/DataStudio/model";
 import {message, Modal} from "antd";
@@ -163,7 +163,7 @@ export function showSessionCluster(dispatch: any) {
   });
 }
 
-/*--- 刷新 Session集群 ---*/
+/*--- 刷新 是否启动海豚服务 ---*/
 export function getDolphinSchduleAvailable(dispatch: any) {
   const res = isUsingDS();
   res.then((result) => {
@@ -237,6 +237,11 @@ export function showAlertGroup(dispatch: any) {
 /*--- 刷新 元数据表 ---*/
 export function showMetaDataTable(id: number) {
   return getData('api/database/getSchemasAndTables', {id: id});
+}
+
+/*--- 清理 元数据表缓存 ---*/
+export function clearMetaDataTable(id: number) {
+  return getData('api/database/unCacheSchemasAndTables', {id: id});
 }
 
 /*--- 刷新 数据表样例数据 ---*/

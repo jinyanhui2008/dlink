@@ -167,3 +167,41 @@ export async function updateTaskDefinition(processCode: string, projectCode: str
     },
   });
 }
+
+//dolphinscheduler -- 工作流上线下线 -- Workflow online and offline
+export async function postDolphinCatalogueRelease(catalogueId: string, releaseState: string) {
+  return request<API.Result>('/api/scheduler/' + catalogueId + '/release', {
+    method: 'POST',
+    params: {
+      releaseState
+    }
+  });
+}
+
+//dolphinscheduler -- 获取定时任务 -- Get scheduled tasks
+export async function getScheduleByCatalogueId(catalogueId: string) {
+  return request<API.Result>('/api/scheduler/' + catalogueId + '/schedule', {
+    method: 'GET'
+  });
+}
+
+//dolphinscheduler -- 添加或修改定时调度 -- Add or modify a scheduled schedule
+export async function postScheduleByCatalogueId(catalogueId: string) {
+  return request<API.Result>('/api/scheduler/' + catalogueId + '/schedule', {
+    method: 'POST'
+  });
+}
+
+//dolphinscheduler -- 执行工作流 -- Execute Workflow
+export async function postStartProcessByCatalogueId(catalogueId: string) {
+  return request<API.Result>('/api/scheduler/' + catalogueId + '/start-process', {
+    method: 'POST'
+  });
+}
+
+//dolphinscheduler -- 查看工作流日志 -- Execute Workflow
+export async function getInstanceByCatalogueId(catalogueId: string) {
+  return request<API.Result>('/api/scheduler/' + catalogueId + '/instance', {
+    method: 'GET'
+  });
+}

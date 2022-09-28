@@ -20,10 +20,16 @@
 
 import React, {Key, useEffect, useState} from "react";
 import {connect} from "umi";
-import {DownloadOutlined, DownOutlined, FolderAddOutlined, SwitcherOutlined, UploadOutlined} from "@ant-design/icons";
+import {
+  DownloadOutlined,
+  DownOutlined,
+  FolderAddOutlined,
+  SwitcherOutlined,
+  UploadOutlined
+} from "@ant-design/icons";
 import type {UploadProps} from 'antd';
 import {Button, Col, Empty, Input, Menu, message, Modal, Row, Tooltip, Tree, Upload} from 'antd';
-import {getCatalogueTreeData} from "@/pages/DataStudio/service";
+import {getCatalogueTreeData, postDolphinCatalogueRelease} from "@/pages/DataStudio/service";
 import {convertToTreeData, getTreeNodeByKey, TreeDataNode} from "@/components/Studio/StudioTree/Function";
 import style from "./index.less";
 import {StateType} from "@/pages/DataStudio/model";
@@ -44,6 +50,7 @@ import {Scrollbars} from "react-custom-scrollbars";
 import {getIcon} from "@/components/Studio/icon";
 import {showEnv, showMetaStoreCatalogs} from "@/components/Studio/StudioEvent/DDL";
 import UploadModal from "@/components/Studio/StudioTree/components/UploadModal";
+import DolphinRunScheduler from "@/components/Studio/StudioTree/components/DolphinRunScheduler";
 
 type StudioTreeProps = {
   rightClickMenu: StateType['rightClickMenu'];
@@ -94,7 +101,7 @@ const {DirectoryTree} = Tree;
 const {Search} = Input;
 
 const StudioTree: React.FC<StudioTreeProps> = (props) => {
-  const {rightClickMenu, dispatch, tabs, refs, toolHeight} = props;
+  const {rightClickMenu, dispatch, tabs, refs, toolHeight, showSubmitDelphin} = props;
   const [treeData, setTreeData] = useState<TreeDataNode[]>();
   const [expandedKeys, setExpandedKeys] = useState<Key[]>();
   const [defaultExpandedKeys, setDefaultExpandedKeys] = useState<any[]>([]);
@@ -114,6 +121,9 @@ const StudioTree: React.FC<StudioTreeProps> = (props) => {
   const [autoExpandParent, setAutoExpandParent] = useState(true);
   const [cutId, setCutId] = useState<number | undefined>(undefined);
   const [exportTaskIds, setExportTaskIds] = useState<any[]>([]);
+
+  const [dolphinSTModalVisible, handleDolphinSTModalVisible] = useState<boolean>(false);
+  const [dolphinCatalogueId, setDolphinCatalogueId] = useState();
 
   const getTreeData = async () => {
     const result = await getCatalogueTreeData();
@@ -194,7 +204,46 @@ const StudioTree: React.FC<StudioTreeProps> = (props) => {
       toCopy(rightClickNode);
     } else if (key == 'ExportJson') {
       toExportJson(rightClickNode);
+    } else if (key == 'Online') {
+      dolphinTaskONOFF(rightClickNode, key)
+    } else if (key == 'Offline') {
+      dolphinTaskONOFF(rightClickNode, key)
+    } else if (key == 'RunScheduler') {
+      dolphinRunScheduler(rightClickNode)
+    } else if (key == 'StartProcess') {
+      dolphinStartProcess(rightClickNode)
+    } else if (key == 'ViewInstance') {
+      dolphinViewInstance(rightClickNode)
     }
+  };
+
+  //海豚，上线/下线
+  const dolphinTaskONOFF = (node: TreeDataNode | undefined, key: string | undefined) => {
+    // debugger
+    const result = postDolphinCatalogueRelease(node.id, key);
+    result.then(result => {
+      if (result.code == CODE.SUCCESS) {
+        message.success(result.msg);
+      } else {
+        message.error(result.msg);
+      }
+    })
+  };
+
+  //设置执行计划
+  const dolphinRunScheduler = (node: TreeDataNode | undefined) => {
+    setDolphinCatalogueId(node.id);
+    handleDolphinSTModalVisible(true);
+  };
+
+  //运行工作流
+  const dolphinStartProcess = (node: TreeDataNode | undefined) => {
+
+  };
+
+  //查看运行日志
+  const dolphinViewInstance = (node: TreeDataNode | undefined) => {
+
   };
 
   const showUploadModal = (node: TreeDataNode | undefined) => {
@@ -454,6 +503,13 @@ const StudioTree: React.FC<StudioTreeProps> = (props) => {
         <Menu.Item key='Cut'>{'剪切'}</Menu.Item>
         {cutId && <Menu.Item key='Paste'>{'粘贴'}</Menu.Item>}
         <Menu.Item disabled>{'删除'}</Menu.Item>
+        {showSubmitDelphin && (<>
+          <Menu.Item key='Online'>{'上线'}</Menu.Item>
+          <Menu.Item key='Offline'>{'下线'}</Menu.Item>
+          <Menu.Item key='RunScheduler'>{'设置执行计划'}</Menu.Item>
+          <Menu.Item key='StartProcess'>{'运行工作流'}</Menu.Item>
+          <Menu.Item key='ViewInstance'>{'查看运行日志'}</Menu.Item>
+        </>)}
       </>)
     } else {
       menuItems = (<>
@@ -707,6 +763,18 @@ const StudioTree: React.FC<StudioTreeProps> = (props) => {
       }} onCancel={() => {
         setIsUploadModalVisible(false)
       }} buttonTitle="上传zip包并创建工程"/>
+
+      <Modal
+        width={700}
+        bodyStyle={{padding: '32px 40px 48px'}}
+        destroyOnClose
+        title="设置执行计划"
+        visible={dolphinSTModalVisible}
+        onCancel={() => handleDolphinSTModalVisible(false)}
+        footer={[]}
+      >
+        <DolphinRunScheduler data={dolphinCatalogueId} handleDolphinSTModalVisible={handleDolphinSTModalVisible}/>
+      </Modal>
     </div>
   );
 };
@@ -718,4 +786,5 @@ export default connect(({Studio}: { Studio: StateType }) => ({
   rightClickMenu: Studio.rightClickMenu,
   refs: Studio.refs,
   toolHeight: Studio.toolHeight,
+  showSubmitDelphin: Studio.canUsed
 }))(StudioTree);

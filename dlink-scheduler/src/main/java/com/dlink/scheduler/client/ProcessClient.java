@@ -19,6 +19,7 @@
 
 package com.dlink.scheduler.client;
 
+import com.dlink.scheduler.config.DolphinSchedulerProperties;
 import com.dlink.scheduler.constant.Constants;
 import com.dlink.scheduler.enums.ExecutionStatus;
 import com.dlink.scheduler.enums.ReleaseState;
@@ -39,7 +40,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import cn.hutool.core.lang.TypeReference;
@@ -57,10 +58,8 @@ public class ProcessClient {
 
     private static final Logger logger = LoggerFactory.getLogger(TaskClient.class);
 
-    @Value("${dinky.dolphinscheduler.url}")
-    private String url;
-    @Value("${dinky.dolphinscheduler.token}")
-    private String tokenKey;
+    @Autowired
+    private DolphinSchedulerProperties dolphinSchedulerProperties;
 
     /**
      * 查询工作流定义
@@ -74,10 +73,10 @@ public class ProcessClient {
     public List<ProcessDefinition> getProcessDefinition(Long projectCode, String processName) {
         Map<String, Object> map = new HashMap<>();
         map.put("projectCode", projectCode);
-        String format = StrUtil.format(url + "/projects/{projectCode}/process-definition", map);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/process-definition", map);
 
         String content = HttpRequest.get(format)
-            .header(Constants.TOKEN, tokenKey)
+            .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
             .form(ParamUtil.getPageParams(processName))
             .timeout(5000)
             .execute().body();
@@ -126,10 +125,10 @@ public class ProcessClient {
         Map<String, Object> map = new HashMap<>();
         map.put("projectCode", projectCode);
         map.put("code", processCode);
-        String format = StrUtil.format(url + "/projects/{projectCode}/process-definition/{code}", map);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/process-definition/{code}", map);
 
         String content = HttpRequest.get(format)
-            .header(Constants.TOKEN, tokenKey)
+            .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
             .timeout(5000)
             .execute().body();
 
@@ -149,7 +148,7 @@ public class ProcessClient {
     public ProcessDefinition createProcessDefinition(Long projectCode, String processName, Long taskCode, String taskDefinitionJson) {
         Map<String, Object> map = new HashMap<>();
         map.put("projectCode", projectCode);
-        String format = StrUtil.format(url + "/projects/{projectCode}/process-definition", map);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/process-definition", map);
 
         Map<String, Object> taskMap = new HashMap<>();
         taskMap.put("code", taskCode);
@@ -165,7 +164,7 @@ public class ProcessClient {
         params.put("executionType", "PARALLEL");
 
         String content = HttpRequest.post(format)
-            .header(Constants.TOKEN, tokenKey)
+            .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
             .form(params)
             .timeout(5000)
             .execute().body();

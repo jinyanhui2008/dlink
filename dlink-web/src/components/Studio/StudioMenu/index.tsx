@@ -30,7 +30,6 @@ import Space from "antd/es/space";
 import Divider from "antd/es/divider";
 import Button from "antd/es/button/button";
 import Breadcrumb from "antd/es/breadcrumb/Breadcrumb";
-import {StateType, UseDolphinType} from "@/pages/DataStudio/model";
 import {connect} from "umi";
 import {CODE, postDataArray} from "@/components/Common/crud";
 import {executeSql, getJobPlan, getTaskDefinition, isUsingDS} from "@/pages/DataStudio/service";
@@ -63,8 +62,7 @@ import {Dispatch} from "@@/plugin-dva/connect";
 import StudioTabs from "@/components/Studio/StudioTabs";
 import {isDeletedTask, JOB_LIFE_CYCLE} from "@/components/Common/JobLifeCycle";
 import DolphinPush from "@/components/Studio/StudioMenu/DolphinPush";
-import {JobInfoDetail} from "@/pages/DevOps/data";
-import studio from "@/components/Studio";
+
 
 const menu = (
   <Menu>
@@ -95,10 +93,6 @@ const StudioMenu = (props: any) => {
   // const [editModalVisible, handleEditModalVisible] = useState<boolean>(false);
   const [graphData, setGraphData] = useState();
   const [dolphinData, setDolphinData] = useState();
-
-  //whether dolphin push button is view
-  const [isShowSubmitDelphin, setIsShowSubmitDelphin] = useState<boolean>(false);
-  const [job] = useState<JobInfoDetail>();
 
   const onKeyDown = useCallback((e) => {
     if (e.keyCode === 83 && (e.ctrlKey === true || e.metaKey)) {
@@ -247,21 +241,6 @@ const StudioMenu = (props: any) => {
       } else {
         message.error(`获取作业执行计划失败，原因：\n${result.msg}`);
         setGraphData(undefined);
-      }
-    })
-  };
-
-  //whether dolphinscheduler dispatching is allowed
-  const useDolphinscheduler = () => {
-    // debugger
-
-    const res = isUsingDS();
-    res.then((result) => {
-      // debugger
-      if (result.code == CODE.SUCCESS) {
-        setIsShowSubmitDelphin(result.datas)
-      } else {
-        message.error(`获取海豚数据失败，原因：\n${result.msg}`);
       }
     })
   };
@@ -670,7 +649,7 @@ const StudioMenu = (props: any) => {
                   />
                 </Tooltip>
               </>)}
-              {isShowSubmitBtn() && showSubmitDelphin&& current.task && current.task.batchModel && (<>
+              {isShowSubmitBtn() && showSubmitDelphin && current.task && current.task.batchModel && (<>
                 <Tooltip title="推送到海豚调度">
                   <Button
                     type="text" style={{color: '#248FFF'}}
@@ -860,16 +839,16 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   }),
 });
 
-export default connect(state  => {
+export default connect(state => {
   // console.log(state)
-  let { Studio} = state
+  let {Studio} = state
   return {
-  isFullScreen: Studio.isFullScreen,
-  current: Studio.current,
-  currentPath: Studio.currentPath,
-  tabs: Studio.tabs,
-  refs: Studio.refs,
-  currentSession: Studio.currentSession,
+    isFullScreen: Studio.isFullScreen,
+    current: Studio.current,
+    currentPath: Studio.currentPath,
+    tabs: Studio.tabs,
+    refs: Studio.refs,
+    currentSession: Studio.currentSession,
     showSubmitDelphin: Studio.canUsed
-}
+  }
 }, mapDispatchToProps)(StudioMenu);

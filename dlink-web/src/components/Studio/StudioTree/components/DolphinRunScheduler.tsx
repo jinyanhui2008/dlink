@@ -1,5 +1,5 @@
 /*
- *
+ *  海豚 设置执行计划
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with
  *  this work for additional information regarding copyright ownership.
@@ -18,7 +18,7 @@
  */
 
 import type {FormInstance} from 'antd/es/form';
-import {Button, Form, InputNumber, message, Select, Switch, Checkbox, Row, Col} from "antd";
+import {Button, Form, InputNumber, message, Select, Switch, Checkbox, Row, Col, DatePicker} from "antd";
 import {StateType} from "@/pages/DataStudio/model";
 import {connect} from "umi";
 import React, {useState, useEffect} from "react";
@@ -30,8 +30,11 @@ import {
 import {CODE} from "@/components/Common/crud";
 import TextArea from "antd/es/input/TextArea";
 
-const DolphinPush = (props: any) => {
-  const {data, taskCur, handleDolphinModalVisible} = props;
+
+const DolphinRunScheduler = (props: any) => {
+  const {data, handleDolphinModalVisible} = props;
+
+  const { RangePicker } = DatePicker;
 
   const [options, setOptions] = useState([]);
   const formRef = React.createRef<FormInstance>();
@@ -45,28 +48,8 @@ const DolphinPush = (props: any) => {
     wrapperCol: {span: 18},
   };
   useEffect(() => {
-    options.length = 0;
-    taskMainInfos();
     setFormValue();
-  }, [taskCur])
-
-  //前置任务数据集合
-  const taskMainInfos = () => {
-    if (taskCur) {
-      const res = getTaskMainInfos(taskCur.task.id);
-      res.then((result) => {
-        if (result.code == CODE.SUCCESS) {
-          setOptions(result.datas.map((item: { taskName: any; taskCode: any; }) => ({
-              label: item.taskName,
-              value: item.taskCode
-            })
-          ))
-        } else {
-          message.error(`获取海豚任务定义集合失败，原因：\n${result.msg}`);
-        }
-      })
-    }
-  };
+  }, [data])
 
   //赋值数据
   const setFormValue = () => {
@@ -138,10 +121,9 @@ const DolphinPush = (props: any) => {
     }
 
     if (!data) {
-      const res = createTaskDefinition(taskCur.task.id, values.upstreamCodes, values);
+      const res = createTaskDefinition(data, values.upstreamCodes, values);
       res.then((result) => {
         if (result.code == CODE.SUCCESS) {
-          message.success(result.msg);
           handleDolphinModalVisible(false);
         } else {
           message.error(`创建任务失败，原因：\n${result.msg}`);
@@ -170,9 +152,8 @@ const DolphinPush = (props: any) => {
 
   return (
     <Form {...layout} ref={formRef} name="control-hooks" onFinish={onFinish}>
-      <Form.Item name={['upstreamCodes']} style={{marginBottom: 10}} label="前置任务">
-        <Select mode='multiple' style={{width: '100%'}} options={options} placeholder='选择前置任务'
-                maxTagCount='responsive'/>
+      <Form.Item name={['upstreamCodes']} style={{marginBottom: 10}} label="起止时间">
+        <RangePicker showTime/>
       </Form.Item>
 
       <Form.Item name={['taskPriority']} style={{marginBottom: 10}} label="优先级">
@@ -231,5 +212,5 @@ const DolphinPush = (props: any) => {
 export default connect(({Studio}: { Studio: StateType }) => ({
   current: Studio.current,
   currentSession: Studio.currentSession,
-}))(DolphinPush);
+}))(DolphinRunScheduler);
 

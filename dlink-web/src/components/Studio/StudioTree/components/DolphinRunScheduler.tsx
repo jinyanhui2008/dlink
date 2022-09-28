@@ -1,5 +1,5 @@
 /*
- *  海豚 设置执行计划
+ *  海豚 设置执行计划 (未完成)
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with
  *  this work for additional information regarding copyright ownership.
@@ -18,30 +18,26 @@
  */
 
 import type {FormInstance} from 'antd/es/form';
-import {Button, Form, InputNumber, message, Select, Switch, Checkbox, Row, Col, DatePicker} from "antd";
+import {Button, Form, InputNumber, message, Select, Switch, Checkbox, Row, Col, DatePicker, Input} from "antd";
 import {StateType} from "@/pages/DataStudio/model";
 import {connect} from "umi";
 import React, {useState, useEffect} from "react";
 import {
-  createTaskDefinition,
-  getTaskMainInfos,
+  createTaskDefinition, getScheduleByCatalogueId,
   updateTaskDefinition
 } from "@/pages/DataStudio/service";
 import {CODE} from "@/components/Common/crud";
 import TextArea from "antd/es/input/TextArea";
-
+import moment from "moment";
 
 const DolphinRunScheduler = (props: any) => {
   const {data, handleDolphinModalVisible} = props;
-
-  const { RangePicker } = DatePicker;
-
-  const [options, setOptions] = useState([]);
+  const {RangePicker} = DatePicker;
   const formRef = React.createRef<FormInstance>();
-
   const [processCode, setProcessCode] = useState("");
-
   const CheckboxGroup = Checkbox.Group;
+
+  const dateFormat = 'YYYY-MM-DD HH:mm:ss';
 
   const layout = {
     labelCol: {span: 6},
@@ -56,6 +52,31 @@ const DolphinRunScheduler = (props: any) => {
     //是否已有数据
     if (data) {
       // debugger
+
+      let result = getScheduleByCatalogueId(data)
+
+      result.then(result => {
+        if (result.code == CODE.SUCCESS) {
+
+          let SEvalue = [moment(result.scheduleRequest.startTime, dateFormat), moment(result.scheduleRequest.endTime, dateFormat)]
+
+          formRef.current.setFieldsValue({
+            SR_SET: SEvalue,
+            SR_crontab: result.scheduleRequest?.crontab,
+            SR_timezoneId: result.scheduleRequest?.timezoneId,
+            environmentCode: result.environmentCode,
+            failureStrategy: result.failureStrategy,
+            processInstancePriority: result.processInstancePriority,
+            scheduleId: result.scheduleId,
+            warningGroupId: result.warningGroupId,
+            warningType: result.warningType,
+            workerGroup: result.workerGroup
+          });
+        } else {
+          message.error(result.msg);
+        }
+      })
+
       setProcessCode(data.processDefinitionCode)
 
       setTimeoutFlagHidden(data.timeoutFlag === 'OPEN');
@@ -87,12 +108,6 @@ const DolphinRunScheduler = (props: any) => {
         timeoutNotifyStrategy: tns
       });
 
-    } else {
-      formRef.current.setFieldsValue({
-        flag: true,
-        taskPriority: 'MEDIUM',
-        timeoutFlag: false,
-      });
     }
   };
 
@@ -156,23 +171,18 @@ const DolphinRunScheduler = (props: any) => {
         <RangePicker showTime/>
       </Form.Item>
 
-      <Form.Item name={['taskPriority']} style={{marginBottom: 10}} label="优先级">
-        <Select style={{width: 180}}>
-          <Option value="HIGH">HIGH</Option>
-          <Option value="HIGHEST">HIGHEST</Option>
-          <Option value="LOW">LOW</Option>
-          <Option value="LOWEST">LOWEST</Option>
-          <Option value="MEDIUM">MEDIUM</Option>
-        </Select>
+      <Form.Item name={['SR_crontab']} style={{marginBottom: 10}} label="定时">
+        <Input/>
       </Form.Item>
 
-      <Form.Item name={['failRetryTimes']} style={{marginBottom: 10}} label="失败重试次数">
+      <Form.Item name={['SR_timezoneId']} style={{marginBottom: 10}} label="失败重试次数">
         <InputNumber min={0} max={99} style={{width: 180}}/>
       </Form.Item>
-      <Form.Item name={['failRetryInterval']} style={{marginBottom: 10}} label="失败重试间隔(分钟)">
-        <InputNumber min={0} style={{width: 180}}/>
+      <Form.Item name={['failureStrategy']} style={{marginBottom: 10}} label="失败策略">
+        <Radio value={'CONTINUE'}>继续</Radio>
+        <Radio value={'END'}>结束</Radio>
       </Form.Item>
-      <Form.Item name={['delayTime']} style={{marginBottom: 10}} label="延时执行时间(分钟)">
+      <Form.Item name={['processInstancePriority']} style={{marginBottom: 10}} label="通知策略">
         <InputNumber min={0} style={{width: 180}}/>
       </Form.Item>
       <Form.Item name={['timeoutFlag']} style={{marginBottom: 10}} label="超时告警" valuePropName="checked">

@@ -208,13 +208,14 @@ const StudioTree: React.FC<StudioTreeProps> = (props) => {
       dolphinTaskONOFF(rightClickNode, key)
     } else if (key == 'Offline') {
       dolphinTaskONOFF(rightClickNode, key)
-    } else if (key == 'RunScheduler') {
-      dolphinRunScheduler(rightClickNode)
-    } else if (key == 'StartProcess') {
-      dolphinStartProcess(rightClickNode)
-    } else if (key == 'ViewInstance') {
-      dolphinViewInstance(rightClickNode)
     }
+    // else if (key == 'RunScheduler') {
+    //   dolphinRunScheduler(rightClickNode)
+    // } else if (key == 'StartProcess') {
+    //   dolphinStartProcess(rightClickNode)
+    // } else if (key == 'ViewInstance') {
+    //   dolphinViewInstance(rightClickNode)
+    // }
   };
 
   //海豚，上线/下线
@@ -230,21 +231,21 @@ const StudioTree: React.FC<StudioTreeProps> = (props) => {
     })
   };
 
-  //设置执行计划
-  const dolphinRunScheduler = (node: TreeDataNode | undefined) => {
-    setDolphinCatalogueId(node.id);
-    handleDolphinSTModalVisible(true);
-  };
-
-  //运行工作流
-  const dolphinStartProcess = (node: TreeDataNode | undefined) => {
-
-  };
-
-  //查看运行日志
-  const dolphinViewInstance = (node: TreeDataNode | undefined) => {
-
-  };
+  // //设置执行计划
+  // const dolphinRunScheduler = (node: TreeDataNode | undefined) => {
+  //   setDolphinCatalogueId(node.id);
+  //   handleDolphinSTModalVisible(true);
+  // };
+  //
+  // //运行工作流
+  // const dolphinStartProcess = (node: TreeDataNode | undefined) => {
+  //
+  // };
+  //
+  // //查看运行日志
+  // const dolphinViewInstance = (node: TreeDataNode | undefined) => {
+  //
+  // };
 
   const showUploadModal = (node: TreeDataNode | undefined) => {
     if (node == undefined) return;
@@ -506,9 +507,9 @@ const StudioTree: React.FC<StudioTreeProps> = (props) => {
         {showSubmitDelphin && (<>
           <Menu.Item key='Online'>{'上线'}</Menu.Item>
           <Menu.Item key='Offline'>{'下线'}</Menu.Item>
-          <Menu.Item key='RunScheduler'>{'设置执行计划'}</Menu.Item>
-          <Menu.Item key='StartProcess'>{'运行工作流'}</Menu.Item>
-          <Menu.Item key='ViewInstance'>{'查看运行日志'}</Menu.Item>
+          {/*<Menu.Item key='RunScheduler'>{'设置执行计划'}</Menu.Item>*/}
+          {/*<Menu.Item key='StartProcess'>{'运行工作流'}</Menu.Item>*/}
+          {/*<Menu.Item key='ViewInstance'>{'查看运行日志'}</Menu.Item>*/}
         </>)}
       </>)
     } else {

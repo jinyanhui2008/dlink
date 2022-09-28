@@ -224,4 +224,9 @@ public class CatalogueServiceImpl extends SuperServiceImpl<CatalogueMapper, Cata
         }
         return parentId;
     }
+
+    @Override
+    public Catalogue getTaskById(int taskId) {
+        return getOne(new LambdaQueryWrapper<Catalogue>().eq(Catalogue::getTaskId, taskId));
+    }
 }

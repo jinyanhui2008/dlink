@@ -20,6 +20,7 @@
 package com.dlink.scheduler.client;
 
 import com.dlink.scheduler.constant.Constants;
+import com.dlink.scheduler.enums.TaskType;
 import com.dlink.scheduler.exception.SchedulerException;
 import com.dlink.scheduler.model.TaskDefinition;
 import com.dlink.scheduler.model.TaskDefinitionLog;
@@ -72,7 +73,7 @@ public class TaskClient {
      * @date 2022/9/7 17:16
      */
     public TaskMainInfo getTaskMainInfo(Long projectCode, String processName, String taskName) {
-        List<TaskMainInfo> lists = getTaskMainInfos(projectCode, processName, taskName);
+        List<TaskMainInfo> lists = getTaskMainInfos(projectCode, processName, taskName, TaskType.DINKY);
         for (TaskMainInfo list : lists) {
             if (list.getTaskName().equalsIgnoreCase(taskName)) {
                 return list;
@@ -91,7 +92,7 @@ public class TaskClient {
      * @author 郑文豪
      * @date 2022/9/7 17:16
      */
-    public List<TaskMainInfo> getTaskMainInfos(Long projectCode, String processName, String taskName) {
+    public List<TaskMainInfo> getTaskMainInfos(Long projectCode, String processName, String taskName, TaskType taskType) {
         Map<String, Object> map = new HashMap<>();
         map.put("projectCode", projectCode);
         String format = StrUtil.format(url + "/projects/{projectCode}/task-definition", map);
@@ -99,7 +100,7 @@ public class TaskClient {
         Map<String, Object> pageParams = ParamUtil.getPageParams();
         pageParams.put("searchTaskName", taskName);
         pageParams.put("searchWorkflowName", processName);
-        pageParams.put("taskType", "DINKY");
+        pageParams.put("taskType", taskType.name());
 
         String content = HttpRequest.get(format)
             .header(Constants.TOKEN, tokenKey)
@@ -119,6 +120,10 @@ public class TaskClient {
             }
         }
         return lists;
+    }
+
+    public List<TaskMainInfo> getTaskMainInfos(Long projectCode, String processName, String taskName) {
+        return getTaskMainInfos(projectCode, processName, taskName, TaskType.DINKY);
     }
 
     /**

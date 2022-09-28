@@ -19,18 +19,16 @@
 
 package com.dlink.scheduler.model;
 
-import java.util.List;
-
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author 郑文豪
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class DlinkTaskParams {
-    @ApiModelProperty(value = "自定义参数")
-    private List<Property> localParams;
+public class DlinkTaskParams extends TaskParams {
 
     @ApiModelProperty(value = "dlink地址")
     private String address;

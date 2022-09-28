@@ -20,8 +20,12 @@
 package com.dlink.scheduler.client;
 
 import com.dlink.scheduler.constant.Constants;
+import com.dlink.scheduler.enums.ExecutionStatus;
+import com.dlink.scheduler.enums.ReleaseState;
 import com.dlink.scheduler.model.DagData;
 import com.dlink.scheduler.model.ProcessDefinition;
+import com.dlink.scheduler.model.ProcessDto;
+import com.dlink.scheduler.model.ProcessInstance;
 import com.dlink.scheduler.result.PageInfo;
 import com.dlink.scheduler.result.Result;
 import com.dlink.scheduler.utils.MyJSONUtil;
@@ -170,4 +174,82 @@ public class ProcessClient {
         }));
     }
 
+    /**
+     * 工作流上线/下线
+     *
+     * @param projectCode  项目编号
+     * @param processCode  工作流编号
+     * @param releaseState 状态
+     * @author 郑文豪
+     * @date 2022/9/26 11:28
+     */
+    public void releaseProcessDefinition(Long projectCode, Long processCode, ReleaseState releaseState) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("projectCode", projectCode);
+        map.put("processCode", processCode);
+        String format = StrUtil.format(url + "/projects/{projectCode}/process-definition/{processCode}/release", map);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("releaseState", releaseState);
+
+        String content = HttpRequest.post(format)
+            .header(Constants.TOKEN, tokenKey)
+            .form(params)
+            .timeout(5000)
+            .execute().body();
+
+        MyJSONUtil.verifyResult(MyJSONUtil.toBean(content, Result.class));
+    }
+
+    public List<ProcessInstance> queryProcessInstanceList(Long projectCode, Long processCode, String startTime, String endTime, String searchVal, String executorName,
+                                                          ExecutionStatus stateType, String host, Integer pageNo, Integer pageSize) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("projectCode", projectCode);
+        String format = StrUtil.format(url + "/projects/{projectCode}/process-definition/{processCode}/release", map);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("processDefineCode", processCode);
+        params.put("startTime", startTime);
+        params.put("endTime", endTime);
+        params.put("searchVal", searchVal);
+        params.put("executorName", executorName);
+        params.put("stateType", stateType);
+        params.put("host", host);
+        params.put("pageNo", pageNo);
+        params.put("pageSize", pageSize);
+
+        String content = HttpRequest.post(format)
+            .header(Constants.TOKEN, tokenKey)
+            .form(params)
+            .timeout(5000)
+            .execute().body();
+        PageInfo<JSONObject> data = MyJSONUtil.toPageBean(content);
+        List<ProcessInstance> lists = new ArrayList<>();
+        if (data == null || data.getTotalList() == null) {
+            return lists;
+        }
+
+        for (JSONObject jsonObject : data.getTotalList()) {
+            lists.add(MyJSONUtil.toBean(jsonObject, ProcessInstance.class));
+        }
+        return lists;
+    }
+
+    public ProcessDto queryProcessDefinitionSimpleList(Long projectCode) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("projectCode", projectCode);
+        String format = StrUtil.format(url + "/projects/{projectCode}/process-definition/simple-list", map);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("projectCode", projectCode);
+
+        String content = HttpRequest.get(format)
+            .header(Constants.TOKEN, tokenKey)
+            .form(params)
+            .timeout(5000)
+            .execute().body();
+
+        return MyJSONUtil.verifyResult(MyJSONUtil.toBean(content, new TypeReference<Result<ProcessDto>>() {
+        }));
+    }
 }

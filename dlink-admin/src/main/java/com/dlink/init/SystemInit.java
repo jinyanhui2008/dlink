@@ -36,6 +36,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
@@ -63,6 +64,9 @@ public class SystemInit implements ApplicationRunner {
 
     private static Project project;
 
+    @Value("${dinky.dolphinscheduler.enabled}")
+    private boolean isEnabled;
+
     @Override
     public void run(ApplicationArguments args) throws Exception {
         sysConfigService.initSysConfig();
@@ -74,13 +78,15 @@ public class SystemInit implements ApplicationRunner {
         }
         log.info("启动的任务数量:" + configList.size());
         DaemonFactory.start(configList);
-        try {
-            project = projectClient.getDinkyProject();
-            if (project == null) {
-                project = projectClient.createDinkyProject();
+        if (isEnabled) {
+            try {
+                project = projectClient.getDinkyProject();
+                if (project == null) {
+                    project = projectClient.createDinkyProject();
+                }
+            } catch (Exception e) {
+                log.error("海豚调度异常: {}", e);
             }
-        } catch (Exception e) {
-            log.error("海豚调度异常: {}", e);
         }
     }
 

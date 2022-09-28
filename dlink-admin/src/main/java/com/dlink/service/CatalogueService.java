@@ -50,4 +50,6 @@ public interface CatalogueService extends ISuperService<Catalogue> {
     boolean copyTask(Catalogue catalogue);
 
     Integer addDependCatalogue(String[] catalogueNames);
+
+    Catalogue getTaskById(int taskId);
 }

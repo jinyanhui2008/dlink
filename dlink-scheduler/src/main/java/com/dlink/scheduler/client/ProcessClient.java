@@ -186,13 +186,13 @@ public class ProcessClient {
         Map<String, Object> map = new HashMap<>();
         map.put("projectCode", projectCode);
         map.put("processCode", processCode);
-        String format = StrUtil.format(url + "/projects/{projectCode}/process-definition/{processCode}/release", map);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/process-definition/{processCode}/release", map);
 
         Map<String, Object> params = new HashMap<>();
         params.put("releaseState", releaseState);
 
         String content = HttpRequest.post(format)
-            .header(Constants.TOKEN, tokenKey)
+            .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
             .form(params)
             .timeout(5000)
             .execute().body();
@@ -204,7 +204,7 @@ public class ProcessClient {
                                                           ExecutionStatus stateType, String host, Integer pageNo, Integer pageSize) {
         Map<String, Object> map = new HashMap<>();
         map.put("projectCode", projectCode);
-        String format = StrUtil.format(url + "/projects/{projectCode}/process-definition/{processCode}/release", map);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/process-definition/{processCode}/release", map);
 
         Map<String, Object> params = new HashMap<>();
         params.put("processDefineCode", processCode);
@@ -218,7 +218,7 @@ public class ProcessClient {
         params.put("pageSize", pageSize);
 
         String content = HttpRequest.post(format)
-            .header(Constants.TOKEN, tokenKey)
+            .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
             .form(params)
             .timeout(5000)
             .execute().body();
@@ -237,13 +237,13 @@ public class ProcessClient {
     public ProcessDto queryProcessDefinitionSimpleList(Long projectCode) {
         Map<String, Object> map = new HashMap<>();
         map.put("projectCode", projectCode);
-        String format = StrUtil.format(url + "/projects/{projectCode}/process-definition/simple-list", map);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/process-definition/simple-list", map);
 
         Map<String, Object> params = new HashMap<>();
         params.put("projectCode", projectCode);
 
         String content = HttpRequest.get(format)
-            .header(Constants.TOKEN, tokenKey)
+            .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
             .form(params)
             .timeout(5000)
             .execute().body();

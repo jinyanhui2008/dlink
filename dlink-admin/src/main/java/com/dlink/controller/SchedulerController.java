@@ -22,22 +22,37 @@ package com.dlink.controller;
 import com.dlink.common.result.Result;
 import com.dlink.init.SystemInit;
 import com.dlink.model.Catalogue;
+import com.dlink.scheduler.client.ExecutorClient;
 import com.dlink.scheduler.client.ProcessClient;
+import com.dlink.scheduler.client.SchedulerClient;
 import com.dlink.scheduler.client.TaskClient;
+import com.dlink.scheduler.config.DolphinSchedulerProperties;
+import com.dlink.scheduler.enums.CommandType;
+import com.dlink.scheduler.enums.ComplementDependentMode;
+import com.dlink.scheduler.enums.ExecutionStatus;
+import com.dlink.scheduler.enums.FailureStrategy;
+import com.dlink.scheduler.enums.Priority;
 import com.dlink.scheduler.enums.ReleaseState;
+import com.dlink.scheduler.enums.RunMode;
+import com.dlink.scheduler.enums.TaskDependType;
+import com.dlink.scheduler.enums.TaskType;
+import com.dlink.scheduler.enums.WarningType;
 import com.dlink.scheduler.exception.SchedulerException;
 import com.dlink.scheduler.model.DagData;
-import com.dlink.scheduler.model.DlinkTaskParams;
 import com.dlink.scheduler.model.ProcessDefinition;
+import com.dlink.scheduler.model.ProcessDto;
+import com.dlink.scheduler.model.ProcessInstance;
 import com.dlink.scheduler.model.Project;
+import com.dlink.scheduler.model.ScheduleRequest;
+import com.dlink.scheduler.model.ScheduleVo;
 import com.dlink.scheduler.model.TaskDefinition;
 import com.dlink.scheduler.model.TaskMainInfo;
 import com.dlink.scheduler.model.TaskRequest;
+import com.dlink.scheduler.utils.ParamUtil;
 import com.dlink.service.CatalogueService;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -45,17 +60,14 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.google.common.collect.Lists;
 
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
@@ -190,7 +202,7 @@ public class SchedulerController {
             TaskType taskType = TaskType.valueOf(taskRequest.getTaskType());
             switch (taskType) {
                 case DINKY:
-                    taskParams = ParamUtil.getDlinkTaskParams(url, dinkyTaskId);
+                    taskParams = ParamUtil.getDlinkTaskParams(dolphinSchedulerProperties.getUrl(), dinkyTaskId);
                     break;
                 case SUB_PROCESS:
                     taskParams = ParamUtil.getSubProcessParams(processDefinitionCode);
@@ -382,7 +394,7 @@ public class SchedulerController {
         List<ProcessInstance> lists = processClient.queryProcessInstanceList(projectCode, processDefinition.getCode(), startTime, endTime, searchVal,
             executorName, stateType, host, pageNo, pageSize);
 
-        String schedulerUrl = url + "/ui/projects/" + projectCode + "/workflow/instances/";
+        String schedulerUrl = dolphinSchedulerProperties.getUrl() + "/ui/projects/" + projectCode + "/workflow/instances/";
         for (ProcessInstance list : lists) {
             list.setSchedulerUrl(schedulerUrl + list.getId() + "?code=" + list.getProcessDefinitionCode());
         }

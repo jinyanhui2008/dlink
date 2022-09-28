@@ -19,6 +19,7 @@
 
 package com.dlink.scheduler.client;
 
+import com.dlink.scheduler.config.DolphinSchedulerProperties;
 import com.dlink.scheduler.constant.Constants;
 import com.dlink.scheduler.enums.CommandType;
 import com.dlink.scheduler.enums.ComplementDependentMode;
@@ -35,7 +36,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import cn.hutool.core.util.StrUtil;
@@ -48,32 +49,12 @@ import cn.hutool.http.HttpRequest;
 public class ExecutorClient {
     private static final Logger logger = LoggerFactory.getLogger(ExecutorClient.class);
 
-    @Value("${dinky.dolphinscheduler.url}")
-    private String url;
-    @Value("${dinky.dolphinscheduler.token}")
-    private String tokenKey;
+    @Autowired
+    private DolphinSchedulerProperties dolphinSchedulerProperties;
 
     /**
      * 执行工作流
      *
-     * @param projectCode               描述
-     * @param processCode               描述
-     * @param scheduleTime              描述
-     * @param failureStrategy           描述
-     * @param startNodeList             描述
-     * @param taskDependType            描述
-     * @param execType                  描述
-     * @param warningType               描述
-     * @param warningGroupId            描述
-     * @param runMode                   描述
-     * @param processInstancePriority   描述
-     * @param workerGroup               描述
-     * @param environmentCode           描述
-     * @param timeout                   描述
-     * @param startParams               描述
-     * @param expectedParallelismNumber 描述
-     * @param dryRun                    描述
-     * @param complementDependentMode   描述
      * @author 郑文豪
      * @date 2022/9/26 15:21
      */
@@ -85,7 +66,7 @@ public class ExecutorClient {
 
         Map<String, Object> map = new HashMap<>();
         map.put("projectCode", projectCode);
-        String format = StrUtil.format(url + "/projects/{projectCode}/executors/start-process-instance", map);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/executors/start-process-instance", map);
 
         Map<String, Object> params = new HashMap<>();
         params.put("processDefinitionCode", processCode);
@@ -107,7 +88,7 @@ public class ExecutorClient {
         params.put("complementDependentMode", complementDependentMode);
 
         String content = HttpRequest.post(format)
-            .header(Constants.TOKEN, tokenKey)
+            .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
             .form(params)
             .timeout(5000)
             .execute().body();

@@ -19,6 +19,7 @@
 
 package com.dlink.scheduler.client;
 
+import com.dlink.scheduler.config.DolphinSchedulerProperties;
 import com.dlink.scheduler.constant.Constants;
 import com.dlink.scheduler.enums.FailureStrategy;
 import com.dlink.scheduler.enums.Priority;
@@ -36,7 +37,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import cn.hutool.core.lang.TypeReference;
@@ -51,17 +52,15 @@ import cn.hutool.json.JSONObject;
 public class SchedulerClient {
     private static final Logger logger = LoggerFactory.getLogger(SchedulerClient.class);
 
-    @Value("${dinky.dolphinscheduler.url}")
-    private String url;
-    @Value("${dinky.dolphinscheduler.token}")
-    private String tokenKey;
+    @Autowired
+    private DolphinSchedulerProperties dolphinSchedulerProperties;
 
     public Schedule createSchedule(Long projectCode, Long processCode, String schedule, WarningType warningType,
                                    int warningGroupId, FailureStrategy failureStrategy, Priority processInstancePriority,
                                    String workerGroup, Long environmentCode) {
         Map<String, Object> map = new HashMap<>();
         map.put("projectCode", projectCode);
-        String format = StrUtil.format(url + "/projects/{projectCode}/schedules", map);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/schedules", map);
 
         Map<String, Object> params = new HashMap<>();
         params.put("processDefinitionCode", processCode);
@@ -74,7 +73,7 @@ public class SchedulerClient {
         params.put("environmentCode", environmentCode);
 
         String content = HttpRequest.post(format)
-            .header(Constants.TOKEN, tokenKey)
+            .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
             .form(params)
             .timeout(5000)
             .execute().body();
@@ -89,7 +88,7 @@ public class SchedulerClient {
         Map<String, Object> map = new HashMap<>();
         map.put("projectCode", projectCode);
         map.put("id", scheduleId);
-        String format = StrUtil.format(url + "/projects/{projectCode}/schedules", map);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/schedules", map);
 
         Map<String, Object> params = new HashMap<>();
         params.put("schedule", schedule);
@@ -101,7 +100,7 @@ public class SchedulerClient {
         params.put("environmentCode", environmentCode);
 
         String content = HttpRequest.put(format)
-            .header(Constants.TOKEN, tokenKey)
+            .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
             .form(params)
             .timeout(5000)
             .execute().body();
@@ -123,14 +122,14 @@ public class SchedulerClient {
     public List<ScheduleVo> querySchedules(Long projectCode, Long processCode, String processName) {
         Map<String, Object> map = new HashMap<>();
         map.put("projectCode", projectCode);
-        String format = StrUtil.format(url + "/projects/{projectCode}/schedules", map);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/schedules", map);
 
         Map<String, Object> params = new HashMap<>();
         params.put("processDefinitionCode", processCode);
         params.put("searchVal", processName);
 
         String content = HttpRequest.get(format)
-            .header(Constants.TOKEN, tokenKey)
+            .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
             .form(params)
             .timeout(5000)
             .execute().body();
@@ -179,13 +178,13 @@ public class SchedulerClient {
     public List<String> previewSchedule(Long projectCode, String schedule) {
         Map<String, Object> map = new HashMap<>();
         map.put("projectCode", projectCode);
-        String format = StrUtil.format(url + "/projects/{projectCode}/schedules/preview", map);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/schedules/preview", map);
 
         Map<String, Object> params = new HashMap<>();
         params.put("schedule", schedule);
 
         String content = HttpRequest.post(format)
-            .header(Constants.TOKEN, tokenKey)
+            .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
             .form(params)
             .timeout(5000)
             .execute().body();

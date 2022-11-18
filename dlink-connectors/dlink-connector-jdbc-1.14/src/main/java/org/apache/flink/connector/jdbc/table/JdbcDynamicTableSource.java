@@ -24,6 +24,7 @@ import org.apache.flink.connector.jdbc.dialect.JdbcDialect;
 import org.apache.flink.connector.jdbc.internal.options.JdbcConnectorOptions;
 import org.apache.flink.connector.jdbc.internal.options.JdbcLookupOptions;
 import org.apache.flink.connector.jdbc.internal.options.JdbcReadOptions;
+import org.apache.flink.connector.jdbc.split.JdbcDatetimeBetweenParametersProvider;
 import org.apache.flink.connector.jdbc.split.JdbcNumericBetweenParametersProvider;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.connector.ChangelogMode;
@@ -38,6 +39,9 @@ import org.apache.flink.table.types.logical.RowType;
 import org.apache.flink.table.utils.TableSchemaUtils;
 import org.apache.flink.util.Preconditions;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Objects;
 
 /** A {@link DynamicTableSource} for JDBC. */
@@ -48,6 +52,7 @@ public class JdbcDynamicTableSource
             LookupTableSource,
             SupportsProjectionPushDown,
             SupportsLimitPushDown {
+    private static final Logger logger = LoggerFactory.getLogger(JdbcDatetimeBetweenParametersProvider.class);
 
     private final JdbcConnectorOptions options;
     private final JdbcReadOptions readOptions;
@@ -111,9 +116,17 @@ public class JdbcDynamicTableSource
             long lowerBound = readOptions.getPartitionLowerBound().get();
             long upperBound = readOptions.getPartitionUpperBound().get();
             int numPartitions = readOptions.getNumPartitions().get();
-            builder.setParametersProvider(
+            if (!lookupOptions.isScanPartitionByDatetime()) {
+                builder.setParametersProvider(
                     new JdbcNumericBetweenParametersProvider(lowerBound, upperBound)
-                            .ofBatchNum(numPartitions));
+                        .ofBatchNum(numPartitions));
+            } else {
+                logger.error("这里使用时间分片调用");
+                //这里将时间戳转化为日期类型
+                builder.setParametersProvider(
+                    new JdbcDatetimeBetweenParametersProvider(lowerBound, upperBound)
+                        .ofBatchNum(numPartitions));
+            }
             if (lookupOptions.getPreFilterCondition().length > 0) {
                 query += " AND ";
             } else {

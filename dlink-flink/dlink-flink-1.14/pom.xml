@@ -39,6 +39,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <junit.version>4.12</junit.version>
+        <debezium.version>1.8.0.Final</debezium.version>
     </properties>
 
     <dependencies>
@@ -147,6 +148,16 @@
             <groupId>com.ververica</groupId>
             <artifactId>flink-sql-connector-sqlserver-cdc</artifactId>
             <version>${flinkcdc.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>debezium-core</artifactId>
+                    <groupId>io.debezium</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>debezium-connector-postgres</artifactId>
+                    <groupId>io.debezium</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.ververica</groupId>
@@ -182,6 +193,19 @@
             <groupId>com.starrocks</groupId>
             <artifactId>flink-connector-starrocks</artifactId>
             <version>1.2.3_flink-1.14_${scala.binary.version}</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>io.debezium</groupId>
+            <artifactId>debezium-core</artifactId>
+            <version>${debezium.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.debezium</groupId>
+            <artifactId>debezium-connector-postgres</artifactId>
+            <version>${debezium.version}</version>
         </dependency>
     </dependencies>
 </project>

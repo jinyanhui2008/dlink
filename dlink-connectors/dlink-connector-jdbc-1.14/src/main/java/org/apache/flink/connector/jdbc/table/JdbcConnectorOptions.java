@@ -88,24 +88,30 @@ public class JdbcConnectorOptions {
 
     public static final ConfigOption<Long> SCAN_PARTITION_LOWER_BOUND =
             ConfigOptions.key("scan.partition.lower-bound")
-                    .longType()
-                    .noDefaultValue()
-                    .withDescription("The smallest value of the first partition.");
+                .longType()
+                .noDefaultValue()
+                .withDescription("The smallest value of the first partition.");
 
     public static final ConfigOption<Long> SCAN_PARTITION_UPPER_BOUND =
-            ConfigOptions.key("scan.partition.upper-bound")
-                    .longType()
-                    .noDefaultValue()
-                    .withDescription("The largest value of the last partition.");
+        ConfigOptions.key("scan.partition.upper-bound")
+            .longType()
+            .noDefaultValue()
+            .withDescription("The largest value of the last partition.");
+
+    public static final ConfigOption<Boolean> SCAN_PARTITION_BY_DATETIME =
+        ConfigOptions.key("scan.partition.by-datetime")
+            .booleanType()
+            .defaultValue(false)
+            .withDescription("partition by datetime.");
 
     public static final ConfigOption<Integer> SCAN_FETCH_SIZE =
-            ConfigOptions.key("scan.fetch-size")
-                    .intType()
-                    .defaultValue(0)
-                    .withDescription(
-                            "Gives the reader a hint as to the number of rows that should be fetched "
-                                    + "from the database per round-trip when reading. "
-                                    + "If the value is zero, this hint is ignored.");
+        ConfigOptions.key("scan.fetch-size")
+            .intType()
+            .defaultValue(0)
+            .withDescription(
+                "Gives the reader a hint as to the number of rows that should be fetched "
+                    + "from the database per round-trip when reading. "
+                    + "If the value is zero, this hint is ignored.");
 
     public static final ConfigOption<Boolean> SCAN_AUTO_COMMIT =
             ConfigOptions.key("scan.auto-commit")

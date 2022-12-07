@@ -20,7 +20,9 @@
 package com.dlink.service.impl;
 
 import com.dlink.assertion.Asserts;
+import com.dlink.assertion.Tips;
 import com.dlink.common.result.ProTableResult;
+import com.dlink.context.TenantContextHolder;
 import com.dlink.db.service.impl.SuperServiceImpl;
 import com.dlink.db.util.ProTableUtil;
 import com.dlink.explainer.lineage.LineageBuilder;
@@ -33,7 +35,6 @@ import com.dlink.model.JobInstance;
 import com.dlink.model.JobInstanceCount;
 import com.dlink.model.JobInstanceStatus;
 import com.dlink.model.JobStatus;
-import com.dlink.model.SystemConfiguration;
 import com.dlink.service.ClusterConfigurationService;
 import com.dlink.service.ClusterService;
 import com.dlink.service.HistoryService;
@@ -196,11 +197,7 @@ public class JobInstanceServiceImpl extends SuperServiceImpl<JobInstanceMapper, 
     @Override
     public LineageResult getLineage(Integer id) {
         History history = getJobInfoDetail(id).getHistory();
-        if (SystemConfiguration.getInstances().isUseLogicalPlan()) {
-            return LineageBuilder.getColumnLineageByLogicalPlan(history.getStatement());
-        } else {
-            return LineageBuilder.getLineage(history.getStatement());
-        }
+        return LineageBuilder.getColumnLineageByLogicalPlan(history.getStatement());
     }
 
     @Override
@@ -230,6 +227,13 @@ public class JobInstanceServiceImpl extends SuperServiceImpl<JobInstanceMapper, 
         }
         return ProTableResult.<JobInstance>builder().success(true).data(list).total(page.getTotal()).current(current)
                 .pageSize(pageSize).build();
+    }
+
+    @Override
+    public void initTenantByJobInstanceId(Integer id) {
+        Integer tenantId = baseMapper.getTenantByJobInstanceId(id);
+        Asserts.checkNull(tenantId, Tips.JOB_INSTANCE_NOT_EXIST);
+        TenantContextHolder.set(tenantId);
     }
 
 }

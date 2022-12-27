@@ -69,6 +69,11 @@ const ClusterForm: React.FC<ClusterFormProps> = (props) => {
     handleSubmit(fieldsValue);
   };
 
+  const onModalCancel = () => {
+    handleModalVisible(false);
+    form.resetFields();
+  };
+
   const renderContent = (formValsPara: Partial<ClusterTableListItem>) => {
     return (
       <>
@@ -151,7 +156,7 @@ const ClusterForm: React.FC<ClusterFormProps> = (props) => {
   const renderFooter = () => {
     return (
       <>
-        <Button onClick={() => handleModalVisible(false)}>{l('button.cancel')}</Button>
+        <Button onClick={() => onModalCancel()}>{l('button.cancel')}</Button>
         <Button type="primary" onClick={() => submitForm()}>
           {l('button.finish')}
         </Button>
@@ -167,7 +172,7 @@ const ClusterForm: React.FC<ClusterFormProps> = (props) => {
       title={formVals.id ? l('pages.rc.cluster.modify') : l('pages.rc.cluster.create')}
       visible={modalVisible}
       footer={renderFooter()}
-      onCancel={() => handleModalVisible()}
+      onCancel={() => onModalCancel()}
     >
       <Form
         {...formLayout}
